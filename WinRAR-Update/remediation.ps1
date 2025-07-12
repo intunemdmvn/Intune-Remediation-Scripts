@@ -7,7 +7,7 @@ $versions = Invoke-RestMethod -Uri $apiUrl -Headers @{ 'User-Agent' = 'PowerShel
 $versionFolders = $versions | Where-Object { $_.type -eq "dir" }
 
 # Extract and sort version numbers then get the latest version
-$sortedVersions = $versionFolders | ForEach-Object { $_.name } | Sort-Object {[version]$_} -Descending
+$sortedVersions = $versionFolders | ForEach-Object { $_.name } | Sort-Object {[version]$_} -Descending -ErrorAction SilentlyContinue
 $latestVersion = $sortedVersions[0]
 
 # Get contents of the latest version folder then find the .installer.yaml file

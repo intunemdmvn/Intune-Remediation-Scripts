@@ -1,17 +1,17 @@
 
-# GitHub API URL for the app manifest
+# GitHub API URL for the app manifest.
 $apiUrl = "https://api.github.com/repos/microsoft/winget-pkgs/contents/manifests/r/RARLab/WinRAR"
 
-# Fetch version folders then filter only version folders
+# Fetch version folders then filter only version folders.
 $versions = Invoke-RestMethod -Uri $apiUrl -Headers @{ 'User-Agent' = 'PowerShell' }
 $versionFolders = $versions | Where-Object { $_.type -eq "dir" }
 
-# Extract and sort version numbers then get the latest version
+# Extract and sort version numbers then get the latest version.
 $sortedVersions = $versionFolders | ForEach-Object { $_.name } | Sort-Object {[version]$_} -Descending -ErrorAction SilentlyContinue
 $latestVersion = $sortedVersions[0]
 
-Try {
-    # Get the installed version of WinRAR to the $installedVersion variable
+# Check the installed version number of the app and store it to the $installedVersion variable.
+try {
     $regPaths = @(
         "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
         "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
@@ -26,14 +26,16 @@ Try {
             }
         }
     }
+    # If the installed version is greater than or equal the latest version. Return exit code exit 0 and the remediation script won't run.
     If ($installedVersion -ge $latestVersion){
         Write-Output "Compliant"
-        Exit 0
-    } 
+        exit 0
+    }
+    # Return exit code exit 1 and the remediation script will be executed.
     Write-Warning "Not Compliant"
-    Exit 1
+    exit 1
 } 
-Catch {
+catch {
     Write-Warning "Not Compliant"
-    Exit 1
+    exit 1
 }

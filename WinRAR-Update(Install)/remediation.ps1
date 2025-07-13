@@ -1,16 +1,16 @@
 
-# GitHub API URL for the app manifest
+# GitHub API URL for the app manifest.
 $apiUrl = "https://api.github.com/repos/microsoft/winget-pkgs/contents/manifests/r/RARLab/WinRAR"
 
-# Fetch version folders then filter only version folders
+# Fetch version folders then filter only version folders.
 $versions = Invoke-RestMethod -Uri $apiUrl -Headers @{ 'User-Agent' = 'PowerShell' }
 $versionFolders = $versions | Where-Object { $_.type -eq "dir" }
 
-# Extract and sort version numbers then get the latest version
+# Extract and sort version numbers then get the latest version.
 $sortedVersions = $versionFolders | ForEach-Object { $_.name } | Sort-Object {[version]$_} -Descending -ErrorAction SilentlyContinue
 $latestVersion = $sortedVersions[0]
 
-# Get contents of the latest version folder then find the .installer.yaml file
+# Get contents of the latest version folder then find the .installer.yaml file.
 $latestApiUrl = "$apiUrl/$latestVersion"
 $latestFiles = Invoke-RestMethod -Uri $latestApiUrl -Headers @{ 'User-Agent' = 'PowerShell' }
 $installerFile = $latestFiles | Where-Object { $_.name -like "*.installer.yaml" }
@@ -20,15 +20,18 @@ $yamlUrl = $installerFile.download_url
 $yamlContent = Invoke-RestMethod -Uri $yamlUrl -Headers @{ 'User-Agent' = 'PowerShell' }
 $installerUrl = ($yamlContent -join "`n") -match "InstallerUrl:\s+(http.*)" | ForEach-Object { $Matches[1] }
 
-# Download the latest installer then starting update process.
-if ($installedVersion -lt $latestVersion) {
-    $webClient = [System.Net.WebClient]::new()
-    $webClient.DownloadFile($installerUrl, "$env:TEMP\winrar-latest.exe")
+# Download the latest installer to the temp folder
+$webClient = [System.Net.WebClient]::new()
+$webClient.DownloadFile($installerUrl, "$env:TEMP\winrar-latest.exe")
 
-    $process = Get-Process -ProcessName 'WinRAR' -ErrorAction SilentlyContinue
-    if ($process) {
-        Stop-Process -ProcessName 'WinRAR' -Force
-    }
-
-    Start-Process -FilePath "$env:TEMP\winrar-latest.exe" -ArgumentList '-s1' -Wait
+# If the app is running, stop it before processing the update.
+$process = Get-Process -ProcessName 'WinRAR' -ErrorAction SilentlyContinue
+if ($process) {
+    $process | Stop-Process -Force
 }
+
+# Start the update (install) process.
+Start-Process -FilePath "$env:TEMP\winrar-latest.exe" -ArgumentList '-s1' -Wait
+
+# Cleanup resources.
+Remove-Item -Path "$env:TEMP\winrar-latest.exe" -Force

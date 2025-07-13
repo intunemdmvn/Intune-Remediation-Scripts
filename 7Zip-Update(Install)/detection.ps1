@@ -10,7 +10,7 @@ $versionFolders = $versions | Where-Object { $_.type -eq "dir" }
 $sortedVersions = $versionFolders | ForEach-Object { $_.name } | Sort-Object {[version]$_} -Descending -ErrorAction SilentlyContinue
 $latestVersion = $sortedVersions[0]
 
-# Check the installed version number of the app and store it to the $installedVersion variable
+# Check the installed version number of the app and store it to the $installedVersion variable.
 try {
     $regPaths = @(
         "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",

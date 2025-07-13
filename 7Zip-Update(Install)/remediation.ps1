@@ -20,7 +20,7 @@ $yamlUrl = $installerFile.download_url
 $yamlContent = Invoke-RestMethod -Uri $yamlUrl -Headers @{ 'User-Agent' = 'PowerShell' }
 $installerUrl = ($yamlContent -join "`n") -match "InstallerUrl:\s+(http.*)" | ForEach-Object { $Matches[1] }
 
-# Download the latest installer to the temp folder
+# Download the latest installer to the temp folder.
 $webClient = [System.Net.WebClient]::new()
 $webClient.DownloadFile($installerUrl, "$env:TEMP\7-zip-latest.exe")
 

@@ -28,6 +28,7 @@ $webClient.DownloadFile($installerUrl, "$env:TEMP\7-zip-latest.exe")
 $process = Get-Process -ProcessName *7z* -ErrorAction SilentlyContinue
 if ($process) {
     $process | Stop-Process -Force
+    Start-Sleep -Seconds 3
 }
 
 # Start the update (install) process.

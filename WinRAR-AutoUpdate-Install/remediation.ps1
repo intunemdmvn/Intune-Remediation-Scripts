@@ -28,6 +28,7 @@ $webClient.DownloadFile($installerUrl, "$env:TEMP\winrar-latest.exe")
 $process = Get-Process -ProcessName 'WinRAR' -ErrorAction SilentlyContinue
 if ($process) {
     $process | Stop-Process -Force
+    Start-Sleep -Seconds 3
 }
 
 # Start the update (install) process.

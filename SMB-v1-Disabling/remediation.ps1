@@ -1,0 +1,1 @@
+Set-SmbServerConfiguration -EnableSMB1Protocol 0        
